@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Your ToDo List</h1>
+<ul id="todo-list" class="list-group mt-4">
+  {% for todo in todos %}
+  <li class="list-group-item" data-id="{{ todo.id }}">
+      <h5>Title: {{ todo.title }}</h5>
+      <p><strong>Description:</strong> {{ todo.description }}</p>
+      <p><strong>Due Date:</strong> 
+          <span class="{% if todo.due_date.date() < current_date %}text-danger font-weight-bold{% endif %}">
+              {{ todo.due_date.strftime('%Y-%m-%d') }}
+          </span>
+      </p>
+      <div class="btn-group" role="group">
+          <a href="{{ url_for('todo.edit_todo', id=todo.id) }}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="{{ url_for('todo.delete_todo', id=todo.id) }}" class="btn btn-danger btn-sm">Delete</a>
+          <a href="{{ url_for('todo.complete_todo', id=todo.id) }}" class="btn btn-success btn-sm">
+              {% if todo.completed %}Uncomplete{% else %}Complete{% endif %}
+          </a>
+      </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    new Sortable(document.getElementById('todo-list'), {
+        animation: 150,
+        ghostClass: 'blue-background-class',
+        onEnd: function (evt) {
+            var itemEl = evt.item;
+            var newOrder = Array.from(document.querySelectorAll('#todo-list li')).map(el => el.dataset.id);
+            fetch('{{ url_for("todo.reorder_todos") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({new_order: newOrder}),
+            });
+        },
+    });
+</script>
+{% endblock %}
