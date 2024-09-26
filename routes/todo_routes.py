@@ -21,7 +21,10 @@ def add_todo():
         due_date = datetime.strptime(request.form["due_date"], "%Y-%m-%d")
 
         todo = ToDo(
-            title=title, description=description, due_date=due_date, user_id=current_user.id
+            title=title,
+            description=description,
+            due_date=due_date,
+            user_id=current_user.id,
         )
         db.session.add(todo)
         db.session.commit()
@@ -30,7 +33,7 @@ def add_todo():
         flash(f"Missing required field: {str(e)}", "error")
     except ValueError as error:
         flash(str(error))
-    
+
     return redirect(url_for("todo.index"))
 
 

@@ -1,4 +1,4 @@
-from flask import Flask, redirect,request, flash
+from flask import Flask, redirect, request, flash
 from flask_login import (
     LoginManager,
 )
@@ -23,6 +23,7 @@ login_manager.login_view = "user.login"
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 @app.errorhandler(Exception)
 def handle_exception(err):
     if len(err.args) > 0:
@@ -30,6 +31,7 @@ def handle_exception(err):
     else:
         flash(str(err))
     return redirect(request.url)
+
 
 app.register_blueprint(user_bp)
 app.register_blueprint(todo_bp)
