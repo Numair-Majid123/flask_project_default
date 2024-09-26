@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, render_template
+from flask import Blueprint, request, redirect, url_for, render_template, flash
 from flask_login import login_required, current_user
 from models import ToDo, db
 from datetime import datetime
@@ -9,21 +9,28 @@ todo_bp = Blueprint("todo", __name__)
 @todo_bp.route("/")
 @login_required
 def index():
-    todos = ToDo.query.filter_by(user_id=current_user.id).order_by(ToDo.order).all()
-    return render_template("index.html", todos=todos)
+    return render_template("index.html")
 
 
 @todo_bp.route("/add_todo", methods=["POST"])
 @login_required
 def add_todo():
-    title = request.form["title"]
-    description = request.form["description"]
-    due_date = datetime.strptime(request.form["due_date"], "%Y-%m-%d")
-    todo = ToDo(
-        title=title, description=description, due_date=due_date, user_id=current_user.id
-    )
-    db.session.add(todo)
-    db.session.commit()
+    try:
+        title = request.form["title"]
+        description = request.form["description"]
+        due_date = datetime.strptime(request.form["due_date"], "%Y-%m-%d")
+
+        todo = ToDo(
+            title=title, description=description, due_date=due_date, user_id=current_user.id
+        )
+        db.session.add(todo)
+        db.session.commit()
+        flash("Todo added successfully", "success")
+    except KeyError as e:
+        flash(f"Missing required field: {str(e)}", "error")
+    except ValueError as error:
+        flash(str(error))
+    
     return redirect(url_for("todo.index"))
 
 
@@ -36,6 +43,7 @@ def edit_todo(id):
         todo.description = request.form["description"]
         todo.due_date = datetime.strptime(request.form["due_date"], "%Y-%m-%d")
         db.session.commit()
+        flash("Todo updated successfully")
         return redirect(url_for("todo.todo_list"))
     return render_template("edit_todo.html", todo=todo)
 
@@ -46,6 +54,7 @@ def delete_todo(id):
     todo = ToDo.query.get_or_404(id)
     db.session.delete(todo)
     db.session.commit()
+    flash("Todo deleted successfully")
     return redirect(url_for("todo.todo_list"))
 
 
@@ -55,6 +64,7 @@ def complete_todo(id):
     todo = ToDo.query.get_or_404(id)
     todo.completed = not todo.completed
     db.session.commit()
+    flash(f"Todo {"completed" if todo.completed else "uncompleted"} successfully")
     return redirect(url_for("todo.todo_list"))
 
 

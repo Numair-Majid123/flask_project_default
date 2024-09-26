@@ -1,9 +1,8 @@
-from flask import Flask
+from flask import Flask, redirect,request, flash
 from flask_login import (
     LoginManager,
 )
-from models import db, User, ToDo
-from datetime import datetime
+from models import db, User
 from routes.user_routes import user_bp
 from routes.todo_routes import todo_bp
 
@@ -24,6 +23,13 @@ login_manager.login_view = "user.login"
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.errorhandler(Exception)
+def handle_exception(err):
+    if len(err.args) > 0:
+        flash(err.args[0])
+    else:
+        flash(str(err))
+    return redirect(request.url)
 
 app.register_blueprint(user_bp)
 app.register_blueprint(todo_bp)

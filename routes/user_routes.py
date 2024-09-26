@@ -16,7 +16,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         flash("Signup successful. Please login.")
-        return redirect(url_for("login"))
+        return redirect(url_for("user.login"))
     return render_template("signup.html")
 
 
@@ -37,4 +37,4 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    return redirect(url_for("user.login"))

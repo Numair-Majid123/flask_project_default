@@ -32,6 +32,10 @@ class User(db.Model):
             raise ValueError("Email cannot be empty")
         if "@" not in email:
             raise ValueError("Invalid email format")
+        existing_user = User.query.filter(User.email == email).first()
+        if existing_user:
+            raise ValueError("Email address already in use")
+        
         return email
 
     def is_authenticated(self):
